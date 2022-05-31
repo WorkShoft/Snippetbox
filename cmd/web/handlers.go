@@ -13,35 +13,15 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		app.notFound(w)
 		return
 	}
-
 	snippets, err := app.snippets.Latest()
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
-
-	for _, snippet := range snippets {
-		fmt.Fprintf(w, "%+v\n", snippet)
-	}
-
-	/*	files := []string{
-			"./ui/html/base.html",
-			"./ui/html/pages/home.html",
-			"./ui/html/partials/nav.html",
-		}
-
-		ts, err := template.ParseFiles(files...)
-
-		if err != nil {
-			app.serverError(w, err)
-			return
-		}
-
-		err = ts.ExecuteTemplate(w, "base", nil)
-
-		if err != nil {
-			app.serverError(w, err)
-		}*/
+	// Use the new render helper.
+	app.render(w, http.StatusOK, "home.html", &templateData{
+		Snippets: snippets,
+	})
 }
 
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
@@ -61,7 +41,9 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "%+v", snippet)
+	app.render(w, http.StatusOK, "view.html", &templateData{
+		Snippet: snippet,
+	})
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
